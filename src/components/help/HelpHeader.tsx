@@ -14,7 +14,7 @@ export default function HelpHeader() {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-24" onClick={() => setOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-48 p-4" onClick={() => setOpen(false)}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div
               className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full animate-slide-up"
@@ -25,14 +25,14 @@ export default function HelpHeader() {
               </button>
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">❓</span>
+                  <span className="text-2xl">â“</span>
                 </div>
-                <h2 className="text-xl font-bold dark:text-white mb-6">¿Necesitas ayuda?</h2>
+                <h2 className="text-xl font-bold dark:text-white mb-6">Â¿Necesitas ayuda?</h2>
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monitor</p>
                   <p className="font-semibold dark:text-white">JUSTIN DAVID MENDOZA ORTIZ</p>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Teléfono</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">TelÃ©fono</p>
                 <p className="text-lg font-bold dark:text-white mb-6">3228825610</p>
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl transition btn-press"
