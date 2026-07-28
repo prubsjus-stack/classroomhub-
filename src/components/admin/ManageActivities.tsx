@@ -119,24 +119,28 @@ export default function ManageActivities() {
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowCreate(false)} />
-          <div className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <ActivityForm onClose={() => { setShowCreate(false); loadData() }} />
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setShowCreate(false)} />
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-10 pb-10 overflow-y-auto">
+            <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+              <ActivityForm onClose={() => { setShowCreate(false); loadData() }} />
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {editingActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setEditingActivity(null)} />
-          <div className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <ActivityForm
-              activity={editingActivity}
-              onClose={() => { setEditingActivity(null); loadData() }}
-            />
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setEditingActivity(null)} />
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-10 pb-10 overflow-y-auto">
+            <div className="w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+              <ActivityForm
+                activity={editingActivity}
+                onClose={() => { setEditingActivity(null); loadData() }}
+              />
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
