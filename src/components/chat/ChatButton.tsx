@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Profile, Message } from '../../types'
+import UserProfileModal from './UserProfileModal'
 import { MessageCircle, X, Send, ArrowLeft, Crown } from 'lucide-react'
 
 export default function ChatButton() {
   const { profile } = useAuth()
   const [open, setOpen] = useState(false)
+  const [profileUser, setProfileUser] = useState<Profile | null>(null)
   const [users, setUsers] = useState<Profile[]>([])
   const [chatUser, setChatUser] = useState<Profile | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -140,20 +142,22 @@ export default function ChatButton() {
                 <button onClick={() => setChatUser(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
                   <ArrowLeft className="w-5 h-5 dark:text-white" />
                 </button>
-                {chatUser.avatar_url ? (
-                  <img src={chatUser.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {getInitials(chatUser.full_name)}
+                <button onClick={() => setProfileUser(chatUser)} className="flex items-center gap-2 text-left hover:opacity-75 transition flex-1 min-w-0">
+                  {chatUser.avatar_url ? (
+                    <img src={chatUser.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {getInitials(chatUser.full_name)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium dark:text-white flex items-center gap-1 truncate">
+                      {chatUser.full_name}
+                      {chatUser.role === 'admin' && <Crown className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0" />}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">@{chatUser.username}</p>
                   </div>
-                )}
-                <div>
-                  <p className="text-sm font-medium dark:text-white flex items-center gap-1">
-                    {chatUser.full_name}
-                    {chatUser.role === 'admin' && <Crown className="w-3.5 h-3.5 text-yellow-500" />}
-                  </p>
-                  <p className="text-xs text-gray-500">@{chatUser.username}</p>
-                </div>
+                </button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -190,6 +194,10 @@ export default function ChatButton() {
             </>
           )}
         </div>
+      )}
+
+      {profileUser && (
+        <UserProfileModal user={profileUser} onClose={() => setProfileUser(null)} />
       )}
     </>
   )
