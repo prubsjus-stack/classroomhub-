@@ -103,9 +103,9 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">¿No tienes cuenta?</p>
-            <button onClick={() => navigate('/register')} className="w-full mt-2 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 font-semibold py-3 px-4 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition btn-press">
+            <a href="/register" className="block w-full mt-2 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 font-semibold py-3 px-4 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition text-center">
               Crear Cuenta
-            </button>
+            </a>
           </div>
         </div>
       </div>
