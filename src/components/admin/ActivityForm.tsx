@@ -71,13 +71,13 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       await supabase.rpc('ensure_storage_bucket')
       const ext = file.name.split('.').pop()
       const filePath = `activities/${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('files').upload(filePath, file, { upsert: true })
+      const { error: uploadError } = await supabase.storage.from('Files').upload(filePath, file, { upsert: true })
       if (uploadError) {
         setError(`Error al subir PDF: ${uploadError.message}`)
         setSubmitting(false)
         return
       }
-      const { data: urlData } = supabase.storage.from('files').getPublicUrl(filePath)
+      const { data: urlData } = supabase.storage.from('Files').getPublicUrl(filePath)
       uploadedUrl = urlData.publicUrl
       uploadedName = file.name
     } else if (linkValue && !file) {
