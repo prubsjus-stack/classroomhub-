@@ -70,7 +70,7 @@ export default function AdminPage() {
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/50" />
           <div onClick={(e) => e.stopPropagation()} className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <ActivityForm onClose={() => setShowCreate(false)} />
           </div>

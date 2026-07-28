@@ -57,11 +57,11 @@ export default function ManageActivities() {
           <select
             value={filterSubject}
             onChange={(e) => setFilterSubject(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-transparent dark:text-white"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-transparent dark:bg-gray-800 dark:text-white"
           >
-            <option value="all">Todas las materias</option>
+            <option value="all" className="dark:bg-gray-800 dark:text-white">Todas las materias</option>
             {subjects.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id} className="dark:bg-gray-800 dark:text-white">{s.name}</option>
             ))}
           </select>
           <span className="text-sm text-gray-500">{filtered.length} actividad{filtered.length !== 1 ? 'es' : ''}</span>
@@ -120,7 +120,7 @@ export default function ManageActivities() {
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/50" />
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <ActivityForm onClose={() => { setShowCreate(false); loadData() }} />
           </div>
@@ -129,7 +129,7 @@ export default function ManageActivities() {
 
       {editingActivity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setEditingActivity(null)}>
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/50" />
           <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <ActivityForm
               activity={editingActivity}

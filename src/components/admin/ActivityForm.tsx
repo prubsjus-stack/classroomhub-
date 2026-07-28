@@ -120,10 +120,10 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
             <select
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
-              className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:bg-gray-800 dark:text-white"
             >
               {ACTIVITY_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+                <option key={t.value} value={t.value} className="dark:bg-gray-800 dark:text-white">{t.label}</option>
               ))}
             </select>
           </div>
@@ -132,11 +132,11 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
             <select
               value={form.subject_id}
               onChange={(e) => setForm({ ...form, subject_id: e.target.value })}
-              className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:text-white"
+              className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:bg-gray-800 dark:text-white"
               required
             >
               {subjects.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id} className="dark:bg-gray-800 dark:text-white">{s.name}</option>
               ))}
             </select>
           </div>
