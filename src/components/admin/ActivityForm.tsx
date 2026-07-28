@@ -25,6 +25,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
   const [fileUrl, setFileUrl] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     supabase.from('subjects').select('*').order('order_index').then(({ data }) => {
@@ -50,10 +51,12 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       setFileUrl(activity.file_url)
       setFileName(activity.file_name)
     }
+    setError('')
   }, [activity])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     setSubmitting(true)
 
     let uploadedUrl = fileUrl
@@ -82,27 +85,34 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       link_url: form.link_url || null,
     }
 
-    if (activity) {
-      await supabase.from('activities').update(activityData).eq('id', activity.id)
-    } else {
-      const { data: newActivity } = await supabase.from('activities').insert(activityData).select().single()
+    try {
+      if (activity) {
+        const { error: updateErr } = await supabase.from('activities').update(activityData).eq('id', activity.id)
+        if (updateErr) throw updateErr
+      } else {
+        const { data: newActivity, error: insertErr } = await supabase.from('activities').insert(activityData).select().single()
+        if (insertErr) throw insertErr
 
-      if (newActivity) {
-        const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin')
-        if (students) {
-          const notifications = students.map((s: { id: string }) => ({
-            user_id: s.id,
-            title: 'Nueva actividad',
-            message: `${form.title} — ${subjects.find(sub => sub.id === form.subject_id)?.name || ''}`,
-            type: 'activity',
-          }))
-          await supabase.from('notifications').insert(notifications)
+        if (newActivity) {
+          const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin')
+          if (students) {
+            const notifications = students.map((s: { id: string }) => ({
+              user_id: s.id,
+              title: 'Nueva actividad',
+              message: `${form.title} — ${subjects.find(sub => sub.id === form.subject_id)?.name || ''}`,
+              type: 'activity',
+            }))
+            const { error: notifErr } = await supabase.from('notifications').insert(notifications)
+            if (notifErr) throw notifErr
+          }
         }
       }
+      setSubmitting(false)
+      onClose()
+    } catch (err: any) {
+      setError(err?.message || 'Error al guardar la actividad')
+      setSubmitting(false)
     }
-
-    setSubmitting(false)
-    onClose()
   }
 
   return (
@@ -246,6 +256,12 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
             </div>
           </div>
         </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         <button
           type="submit"
