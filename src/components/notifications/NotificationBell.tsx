@@ -99,7 +99,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in z-50">
           <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
             <h3 className="font-semibold dark:text-white">Notificaciones</h3>
             {unread > 0 && (
