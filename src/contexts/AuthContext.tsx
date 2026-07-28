@@ -52,14 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (username: string, password: string, remember: boolean): Promise<string | null> => {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('username', username)
-      .single()
-
-    if (!profiles) return 'Usuario no encontrado'
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email: `${username}@classroom.local`,
       password,
@@ -67,16 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) {
       if (error.message.includes('Email not confirmed')) return 'Credenciales inválidas'
+      if (error.message.includes('Invalid login credentials')) return 'Usuario o contraseña incorrectos'
       return error.message
     }
 
     if (data.user) {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ last_sign_in: new Date().toISOString() })
-        .eq('id', data.user.id)
-
-      if (updateError) console.error('Error updating last_sign_in:', updateError)
+      await supabase.from('profiles').update({ last_sign_in: new Date().toISOString() }).eq('id', data.user.id)
     }
 
     if (remember) {
