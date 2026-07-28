@@ -50,6 +50,31 @@ export interface Announcement {
   updated_at: string
 }
 
+export interface SiteConfig {
+  maintenance_mode: boolean
+  maintenance_message: string
+  maintenance_eta: string
+}
+
+export interface Message {
+  id: string
+  sender_id: string
+  receiver_id: string | null
+  message: string
+  created_at: string
+  sender?: Profile
+}
+
+export interface Feedback {
+  id: string
+  user_id: string
+  type: 'error' | 'recomendacion' | 'comentario_positivo'
+  message: string
+  read: boolean
+  created_at: string
+  user?: Profile
+}
+
 export interface Notification {
   id: string
   user_id: string
