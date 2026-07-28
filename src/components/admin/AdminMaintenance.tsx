@@ -6,19 +6,33 @@ import { Construction, Clock } from 'lucide-react'
 export default function AdminMaintenance() {
   const [config, setConfig] = useState<SiteConfig>({ maintenance_mode: false, maintenance_message: '', maintenance_eta: '' })
   const [saving, setSaving] = useState(false)
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
     loadConfig()
   }, [])
 
   const loadConfig = async () => {
-    const { data } = await supabase.from('site_config').select('*').single()
-    if (data) setConfig(data as SiteConfig)
+    const { data, error } = await supabase.from('site_config').select('*').single()
+    if (error) {
+      await supabase.from('site_config').insert({ id: 1 }).maybeSingle()
+      const { data: d2 } = await supabase.from('site_config').select('*').single()
+      if (d2) setConfig(d2 as SiteConfig)
+    } else if (data) {
+      setConfig(data as SiteConfig)
+    }
   }
 
   const save = async () => {
     setSaving(true)
-    await supabase.from('site_config').update(config).eq('id', 1)
+    setMsg(null)
+    const { error } = await supabase.from('site_config').update(config).eq('id', 1)
+    if (error) {
+      setMsg({ ok: false, text: error.message })
+    } else {
+      setMsg({ ok: true, text: 'Cambios guardados' })
+      setTimeout(() => setMsg(null), 2000)
+    }
     setSaving(false)
   }
 
@@ -71,6 +85,10 @@ export default function AdminMaintenance() {
               />
             </div>
           </>
+        )}
+
+        {msg && (
+          <p className={`text-sm text-center ${msg.ok ? 'text-green-600' : 'text-red-600'}`}>{msg.text}</p>
         )}
 
         <button
