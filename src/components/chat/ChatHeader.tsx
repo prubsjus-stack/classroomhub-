@@ -2,33 +2,60 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Profile, Message } from '../../types'
-import { MessageCircle, X, Send, ArrowLeft, Crown } from 'lucide-react'
+import { MessageCircle, Send, ArrowLeft, Crown } from 'lucide-react'
 
-export default function ChatButton() {
+export default function ChatHeader() {
   const { profile } = useAuth()
   const [open, setOpen] = useState(false)
   const [users, setUsers] = useState<Profile[]>([])
   const [chatUser, setChatUser] = useState<Profile | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMsg, setNewMsg] = useState('')
+  const [unread, setUnread] = useState(0)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!profile) return
+    loadUnread()
+
+    const ch = supabase.channel('chat-unread')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${profile.id}`,
+      }, () => {
+        setUnread(prev => prev + 1)
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(ch) }
+  }, [profile])
+
+  const loadUnread = async () => {
+    if (!profile) return
+    const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', profile.id).is('read', false)
+    if (count !== null) setUnread(count)
+  }
+
+  const markAsRead = async () => {
+    if (!profile || !chatUser) return
+    await supabase.from('messages').update({ read: true }).eq('receiver_id', profile.id).eq('sender_id', chatUser.id).is('read', false)
+    setUnread(prev => Math.max(0, prev - messages.filter(m => m.sender_id === chatUser.id && !m.read !== false).length))
+  }
 
   useEffect(() => {
     if (!open) { setChatUser(null); setMessages([]); return }
-    loadUsers()
-  }, [open])
-
-  const loadUsers = async () => {
-    const { data } = await supabase.from('profiles').select('*').neq('id', profile?.id).order('role', { ascending: false })
-    if (data) setUsers(data as Profile[])
-  }
+    supabase.from('profiles').select('*').neq('id', profile?.id).order('role', { ascending: false }).then(({ data }) => {
+      if (data) setUsers(data as Profile[])
+    })
+  }, [open, profile?.id])
 
   useEffect(() => {
     if (!chatUser || !profile) return
     loadMessages()
 
-    const channel = supabase.channel(`chat-${profile.id}`)
+    const channel = supabase.channel(`chat-h-${profile.id}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -51,23 +78,21 @@ export default function ChatButton() {
 
   const loadMessages = async () => {
     if (!chatUser || !profile) return
-    const { data, error: err } = await supabase
+    const { data } = await supabase
       .from('messages')
       .select('*')
       .or(`and(sender_id.eq.${profile.id},receiver_id.eq.${chatUser.id}),and(sender_id.eq.${chatUser.id},receiver_id.eq.${profile.id})`)
       .order('created_at', { ascending: true })
-    if (err) setError(err.message)
     if (data) setMessages(data as Message[])
   }
 
   const sendMessage = async () => {
     if (!profile || !chatUser || !newMsg.trim()) return
-    const { error: err } = await supabase.from('messages').insert({
+    await supabase.from('messages').insert({
       sender_id: profile.id,
       receiver_id: chatUser.id,
       message: newMsg.trim(),
     })
-    if (err) { setError(err.message); return }
     setMessages(prev => [...prev, {
       id: crypto.randomUUID(),
       sender_id: profile.id,
@@ -89,20 +114,18 @@ export default function ChatButton() {
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 left-6 w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center z-40"
-      >
-        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+    <div className="relative">
+      <button onClick={() => setOpen(!open)} className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        <MessageCircle className="w-5 h-5 dark:text-white" />
+        {unread > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+            {unread > 9 ? '9+' : unread}
+          </span>
+        )}
       </button>
 
       {open && (
-        <div className="fixed bottom-24 left-6 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50 animate-slide-up flex flex-col" style={{ height: '460px' }}>
-          {error && (
-            <div className="p-2 bg-red-50 dark:bg-red-900/20 text-xs text-red-600 dark:text-red-400 text-center">{error}</div>
-          )}
-
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in z-50 flex flex-col" style={{ height: '440px' }}>
           {!chatUser ? (
             <>
               <div className="p-4 border-b border-gray-100 dark:border-gray-700">
@@ -111,9 +134,7 @@ export default function ChatButton() {
               </div>
               <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 {users.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => setChatUser(u)}
+                  <button key={u.id} onClick={() => { setChatUser(u); setTimeout(markAsRead, 100) }}
                     className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition text-left"
                   >
                     {u.avatar_url ? (
@@ -157,15 +178,11 @@ export default function ChatButton() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                {messages.length === 0 && (
-                  <div className="text-center py-8 text-gray-400 text-sm">No hay mensajes aún</div>
-                )}
+                {messages.length === 0 && <div className="text-center py-8 text-gray-400 text-sm">No hay mensajes aún</div>}
                 {messages.map(m => (
                   <div key={m.id} className={`flex ${m.sender_id === profile?.id ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
-                      m.sender_id === profile?.id
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 dark:text-white'
+                      m.sender_id === profile?.id ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 dark:text-white'
                     }`}>
                       {m.message}
                     </div>
@@ -175,15 +192,13 @@ export default function ChatButton() {
               </div>
 
               <div className="flex items-center gap-2 p-3 border-t border-gray-100 dark:border-gray-700">
-                <input
-                  type="text"
-                  value={newMsg}
-                  onChange={(e) => setNewMsg(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escribe un mensaje..."
+                <input type="text" value={newMsg} onChange={(e) => setNewMsg(e.target.value)}
+                  onKeyDown={handleKeyDown} placeholder="Escribe un mensaje..."
                   className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-transparent dark:text-white text-sm outline-none"
                 />
-                <button onClick={sendMessage} disabled={!newMsg.trim()} className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition disabled:opacity-50">
+                <button onClick={sendMessage} disabled={!newMsg.trim()}
+                  className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition disabled:opacity-50"
+                >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
@@ -191,6 +206,6 @@ export default function ChatButton() {
           )}
         </div>
       )}
-    </>
+    </div>
   )
 }

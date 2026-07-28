@@ -61,6 +61,7 @@ export interface Message {
   sender_id: string
   receiver_id: string | null
   message: string
+  read: boolean
   created_at: string
   sender?: Profile
 }
