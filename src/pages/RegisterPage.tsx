@@ -14,10 +14,8 @@ export default function RegisterPage() {
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleRegister = async () => {
     setError('')
-
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden')
       return
@@ -26,7 +24,6 @@ export default function RegisterPage() {
       setError('La contraseña debe tener al menos 6 caracteres')
       return
     }
-
     setLoading(true)
     try {
       const err = await signUp(username, fullName, password)
@@ -57,7 +54,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Usuario</label>
               <input
@@ -66,7 +63,6 @@ export default function RegisterPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition dark:text-white"
                 placeholder="Tu usuario"
-                required
               />
             </div>
 
@@ -78,7 +74,6 @@ export default function RegisterPage() {
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition dark:text-white"
                 placeholder="Tu nombre completo"
-                required
               />
             </div>
 
@@ -91,7 +86,6 @@ export default function RegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition dark:text-white"
                   placeholder="Mínimo 6 caracteres"
-                  required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -107,7 +101,6 @@ export default function RegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition dark:text-white"
                 placeholder="Repite la contraseña"
-                required
               />
             </div>
 
@@ -118,13 +111,13 @@ export default function RegisterPage() {
             )}
 
             <button
-              type="submit"
+              onClick={handleRegister}
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition btn-press disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> : <><UserPlus className="w-4 h-4" /> Crear Cuenta</>}
             </button>
-          </form>
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">¿Ya tienes cuenta?</p>
