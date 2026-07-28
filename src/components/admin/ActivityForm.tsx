@@ -73,7 +73,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       }
     }
 
-    const activityData = {
+    const activityData: Record<string, any> = {
       subject_id: form.subject_id,
       title: form.title,
       description: form.description,
@@ -82,12 +82,18 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       importance: form.importance,
       file_url: uploadedUrl,
       file_name: uploadedName,
-      link_url: form.link_url || null,
+    }
+    if (form.link_url) {
+      activityData.link_url = form.link_url
     }
 
     try {
       if (activity) {
-        const { error: updateErr } = await supabase.from('activities').update(activityData).eq('id', activity.id)
+        const updateData = { ...activityData }
+        if (!form.link_url && activity.link_url) {
+          updateData.link_url = null
+        }
+        const { error: updateErr } = await supabase.from('activities').update(updateData).eq('id', activity.id)
         if (updateErr) throw updateErr
       } else {
         const { data: newActivity, error: insertErr } = await supabase.from('activities').insert(activityData).select().single()
