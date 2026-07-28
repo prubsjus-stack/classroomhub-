@@ -6,10 +6,11 @@ interface ActivityCardProps {
   activity: Activity
   completed: boolean
   onComplete: () => void
+  onCancel?: () => void
   showAnimation?: boolean
 }
 
-export default function ActivityCard({ activity, completed, onComplete }: ActivityCardProps) {
+export default function ActivityCard({ activity, completed, onComplete, onCancel }: ActivityCardProps) {
   const typeConfig = ACTIVITY_TYPES.find((t: { value: string }) => t.value === activity.type) || ACTIVITY_TYPES[0]
   const dueDate = activity.due_date ? new Date(activity.due_date) : null
   const now = new Date()
@@ -98,9 +99,19 @@ export default function ActivityCard({ activity, completed, onComplete }: Activi
         )}
 
         {completed && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-xl">
-            <Check className="w-4 h-4" />
-            Completado
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-xl">
+              <Check className="w-4 h-4" />
+              Completado
+            </div>
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-200 dark:hover:bg-red-900/50 transition btn-press"
+              >
+                Cancelar
+              </button>
+            )}
           </div>
         )}
       </div>

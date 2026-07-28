@@ -59,6 +59,19 @@ export default function SubjectPage() {
     setCompletionAnim({ show: true, title: activityTitle })
   }
 
+  const handleUncomplete = async (activityId: string) => {
+    if (!profile) return
+    await supabase.from('completions').delete().match({
+      user_id: profile.id,
+      activity_id: activityId,
+    })
+    setCompletions(prev => {
+      const next = new Set(prev)
+      next.delete(activityId)
+      return next
+    })
+  }
+
   const totalCount = activities.length
   const completedCount = activities.filter(a => completions.has(a.id)).length
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
@@ -141,6 +154,7 @@ export default function SubjectPage() {
                   activity={activity}
                   completed={completions.has(activity.id)}
                   onComplete={() => handleComplete(activity.id, activity.title)}
+                  onCancel={() => handleUncomplete(activity.id)}
                   showAnimation={completionAnim.show && completionAnim.title === activity.title}
                 />
               ))
