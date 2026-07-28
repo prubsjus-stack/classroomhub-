@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Routes, Route, Link, useLocation } from 'react-router-dom'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Header from '../../components/layout/Header'
 import AdminDashboard from '../../components/admin/AdminDashboard'
 import ManageActivities from '../../components/admin/ManageActivities'
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
 ]
 
 export default function AdminPage() {
+  const navigate = useNavigate()
   const location = useLocation()
   const [showCreate, setShowCreate] = useState(false)
 
@@ -35,9 +36,9 @@ export default function AdminPage() {
 
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {NAV_ITEMS.map((item) => (
-            <Link
+            <button
               key={item.path}
-              to={item.path}
+              onClick={() => navigate(item.path)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition ${
                 isActive(item.path, item.exact)
                   ? 'bg-blue-600 text-white'
@@ -46,7 +47,7 @@ export default function AdminPage() {
             >
               <item.icon className="w-4 h-4" />
               {item.label}
-            </Link>
+            </button>
           ))}
         </div>
 
