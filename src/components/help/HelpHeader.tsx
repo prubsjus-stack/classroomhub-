@@ -14,7 +14,7 @@ export default function HelpHeader() {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-24" onClick={() => setOpen(false)}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div
               className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full animate-slide-up"
