@@ -100,6 +100,18 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       if (activity) {
         const { error: updateErr } = await supabase.from('activities').update(activityData).eq('id', activity.id)
         if (updateErr) throw updateErr
+
+        const subjectName = subjects.find(sub => sub.id === form.subject_id)?.name || ''
+        const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin')
+        if (students) {
+          const notifications = students.map((s: { id: string }) => ({
+            user_id: s.id,
+            title: 'Actividad actualizada',
+            message: `${form.title} — ${subjectName}`,
+            type: `activity:${form.subject_id}`,
+          }))
+          await supabase.from('notifications').insert(notifications)
+        }
       } else {
         const { data: newActivity, error: insertErr } = await supabase.from('activities').insert(activityData).select().single()
         if (insertErr) throw insertErr
