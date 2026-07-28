@@ -85,7 +85,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       const { data: newActivity } = await supabase.from('activities').insert(activityData).select().single()
 
       if (newActivity) {
-        const { data: students } = await supabase.from('profiles').select('id').neq('id', 'admin')
+        const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin')
         if (students) {
           const notifications = students.map((s: { id: string }) => ({
             user_id: s.id,
