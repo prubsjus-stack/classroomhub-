@@ -28,12 +28,17 @@ export default function RegisterPage() {
     }
 
     setLoading(true)
-    const err = await signUp(username, fullName, password)
-    setLoading(false)
-    if (err) {
-      setError(err)
-    } else {
-      navigate('/welcome')
+    try {
+      const err = await signUp(username, fullName, password)
+      if (err) {
+        setError(err)
+      } else {
+        navigate('/welcome')
+      }
+    } catch (e: any) {
+      setError(e?.message || 'Error al crear cuenta')
+    } finally {
+      setLoading(false)
     }
   }
 

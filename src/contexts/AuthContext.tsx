@@ -81,14 +81,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp = async (username: string, fullName: string, password: string): Promise<string | null> => {
-    const { data, error } = await supabase.auth.signUp({
-      email: `${username}@classroom.local`,
-      password,
-      options: { data: { username, full_name: fullName } },
-    })
-    if (error) return error.message
-    if (!data.user) return 'Error al crear cuenta'
-    return null
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: `${username}@classroom.local`,
+        password,
+        options: { data: { username, full_name: fullName } },
+      })
+      if (error) return error.message
+      if (!data?.user) return 'Error al crear cuenta'
+      return null
+    } catch (e: any) {
+      return e?.message || 'Error de conexión'
+    }
   }
 
   const signOut = async () => {
