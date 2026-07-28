@@ -4,6 +4,7 @@ import { GraduationCap } from 'lucide-react'
 import UserMenu from './UserMenu'
 import NotificationBell from '../notifications/NotificationBell'
 import ChatHeader from '../chat/ChatHeader'
+import HelpHeader from '../help/HelpHeader'
 
 export default function Header() {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ export default function Header() {
                 Panel Admin
               </button>
             )}
+            <HelpHeader />
             <ChatHeader />
             <NotificationBell />
             <UserMenu />

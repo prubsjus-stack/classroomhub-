@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext'
 import Header from '../components/layout/Header'
 import ActivityCard from '../components/activities/ActivityCard'
 import CompletionAnimation from '../components/activities/CompletionAnimation'
-import HelpButton from '../components/help/HelpButton'
 import type { Subject, Activity, Completion } from '../types'
 import { ArrowLeft, BookOpen } from 'lucide-react'
 
@@ -17,7 +16,6 @@ export default function SubjectPage() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [completions, setCompletions] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
-  const [helpOpen, setHelpOpen] = useState(false)
   const [completionAnim, setCompletionAnim] = useState<{ show: boolean; title: string }>({ show: false, title: '' })
 
   useEffect(() => {
@@ -163,7 +161,6 @@ export default function SubjectPage() {
         </div>
       </main>
 
-      <HelpButton open={helpOpen} onOpenChange={setHelpOpen} />
       <CompletionAnimation
         show={completionAnim.show}
         title={completionAnim.title}

@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import Header from '../components/layout/Header'
 import SubjectCard from '../components/subjects/SubjectCard'
-import HelpButton from '../components/help/HelpButton'
 import type { Subject, Activity, Completion } from '../types'
 import { GraduationCap } from 'lucide-react'
 
@@ -20,7 +19,6 @@ export default function HomePage() {
   const navigate = useNavigate()
   const [subjects, setSubjects] = useState<SubjectWithStats[]>([])
   const [loading, setLoading] = useState(true)
-  const [helpOpen, setHelpOpen] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -119,7 +117,7 @@ export default function HomePage() {
         )}
       </main>
 
-      <HelpButton open={helpOpen} onOpenChange={setHelpOpen} />
+      
     </div>
   )
 }
