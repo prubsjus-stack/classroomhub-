@@ -1,6 +1,6 @@
 import type { Activity } from '../../types'
 import { ACTIVITY_TYPES } from '../../types'
-import { Check, FileText, AlertTriangle } from 'lucide-react'
+import { Check, FileText, AlertTriangle, ExternalLink } from 'lucide-react'
 
 interface ActivityCardProps {
   activity: Activity
@@ -73,6 +73,18 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
                 <span className="text-yellow-600 font-medium"> — Faltan {daysUntilDue} día{daysUntilDue > 1 ? 's' : ''}</span>
               )}
             </span>
+          )}
+          {activity.link_url && (
+            <a
+              href={activity.link_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Enlace
+            </a>
           )}
           {activity.file_url && (
             <a

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { Activity, Subject } from '../../types'
 import { ACTIVITY_TYPES } from '../../types'
-import { X, Upload, Send } from 'lucide-react'
+import { X, Upload, Send, Link } from 'lucide-react'
 
 interface ActivityFormProps {
   activity?: Activity | null
@@ -19,6 +19,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
     due_date: '',
     due_time: '23:59',
     importance: 'media',
+    link_url: '',
   })
   const [file, setFile] = useState<File | null>(null)
   const [fileUrl, setFileUrl] = useState<string | null>(null)
@@ -44,6 +45,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         due_date: activity.due_date ? activity.due_date.split('T')[0] : '',
         due_time: activity.due_date ? activity.due_date.split('T')[1]?.slice(0, 5) || '23:59' : '23:59',
         importance: activity.importance,
+        link_url: activity.link_url || '',
       })
       setFileUrl(activity.file_url)
       setFileName(activity.file_name)
@@ -77,6 +79,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       importance: form.importance,
       file_url: uploadedUrl,
       file_name: uploadedName,
+      link_url: form.link_url || null,
     }
 
     if (activity) {
@@ -223,6 +226,20 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
               accept=".pdf"
               className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium dark:text-gray-300 mb-1">Enlace (opcional)</label>
+          <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5">
+            <Link className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <input
+              type="url"
+              value={form.link_url}
+              onChange={(e) => setForm({ ...form, link_url: e.target.value })}
+              placeholder="https://ejemplo.com/recurso"
+              className="flex-1 bg-transparent dark:text-white outline-none text-sm"
             />
           </div>
         </div>
