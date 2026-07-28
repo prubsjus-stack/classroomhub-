@@ -19,7 +19,7 @@ export default function HelpButton({ open, onOpenChange }: HelpButtonProps) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center pb-24 p-4" onClick={() => onOpenChange(false)}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center pb-4 p-4" onClick={() => onOpenChange(false)}>
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
           <div
             className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full animate-slide-up"
