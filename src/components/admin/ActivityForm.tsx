@@ -212,35 +212,38 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium dark:text-gray-300 mb-1">Archivo PDF (opcional)</label>
-          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-500 transition cursor-pointer"
-            onClick={() => document.getElementById('file-input')?.click()}
-          >
-            <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-            <p className="text-sm text-gray-500">
-              {file ? file.name : fileName ? fileName : 'Haz clic para seleccionar un archivo PDF'}
-            </p>
-            <input
-              id="file-input"
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium dark:text-gray-300 mb-1">Enlace (opcional)</label>
-          <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5">
-            <Link className="w-4 h-4 text-gray-400 flex-shrink-0" />
-            <input
-              type="url"
-              value={form.link_url}
-              onChange={(e) => setForm({ ...form, link_url: e.target.value })}
-              placeholder="https://ejemplo.com/recurso"
-              className="flex-1 bg-transparent dark:text-white outline-none text-sm"
-            />
+          <label className="block text-sm font-medium dark:text-gray-300 mb-2">Archivo o enlace (opcional)</label>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5">
+              <Link className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <input
+                type="url"
+                value={form.link_url}
+                onChange={(e) => setForm({ ...form, link_url: e.target.value })}
+                placeholder="https://ejemplo.com/recurso"
+                className="flex-1 bg-transparent dark:text-white outline-none text-sm"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+              <span>o</span>
+              <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+            </div>
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-500 transition cursor-pointer"
+              onClick={() => document.getElementById('file-input')?.click()}
+            >
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+              <p className="text-sm text-gray-500">
+                {file ? file.name : fileName ? fileName : 'Haz clic para subir un archivo PDF'}
+              </p>
+              <input
+                id="file-input"
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+            </div>
           </div>
         </div>
 
