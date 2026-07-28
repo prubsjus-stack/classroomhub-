@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { Profile } from '../../types'
-import { Search, Crown } from 'lucide-react'
+import { Search, Crown, KeyRound } from 'lucide-react'
 
 export default function ManageUsers() {
   const [users, setUsers] = useState<(Profile & { adminCount?: number })[]>([])
   const [search, setSearch] = useState('')
   const [stats, setStats] = useState({ total: 0, admins: 0, today: 0 })
+  const [resetTarget, setResetTarget] = useState<Profile | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [resetMsg, setResetMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -35,6 +39,25 @@ export default function ManageUsers() {
     }
     await supabase.from('profiles').update({ role: newRole }).eq('id', user.id)
     loadUsers()
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetTarget || !newPassword.trim()) return
+    setResetting(true)
+    setResetMsg(null)
+
+    const { error } = await supabase.rpc('admin_reset_password', {
+      target_user_id: resetTarget.id,
+      new_password: newPassword.trim(),
+    })
+
+    if (error) {
+      setResetMsg({ ok: false, text: error.message })
+    } else {
+      setResetMsg({ ok: true, text: 'Contraseña actualizada correctamente' })
+      setTimeout(() => { setResetTarget(null); setNewPassword(''); setResetMsg(null) }, 1500)
+    }
+    setResetting(false)
   }
 
   const filtered = users.filter(u =>
@@ -119,15 +142,20 @@ export default function ManageUsers() {
                     )}
                   </td>
                   <td className="p-4">
-                    {user.role === 'admin' ? (
-                      <button onClick={() => toggleAdmin(user)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
-                        👑 Quitar admin
+                    <div className="flex items-center gap-1.5">
+                      {user.role === 'admin' ? (
+                        <button onClick={() => toggleAdmin(user)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
+                          👑 Quitar admin
+                        </button>
+                      ) : (
+                        <button onClick={() => toggleAdmin(user)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition">
+                          <Crown className="w-3 h-3" /> Hacer Admin
+                        </button>
+                      )}
+                      <button onClick={() => { setResetTarget(user); setNewPassword(''); setResetMsg(null) }} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition whitespace-nowrap">
+                        <KeyRound className="w-3 h-3" /> Cambiar contraseña
                       </button>
-                    ) : (
-                      <button onClick={() => toggleAdmin(user)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition">
-                        <Crown className="w-3 h-3" /> Hacer Admin
-                      </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -139,6 +167,54 @@ export default function ManageUsers() {
           <div className="text-center py-12 text-gray-500">No se encontraron usuarios</div>
         )}
       </div>
+
+      {resetTarget && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => { setResetTarget(null); setResetMsg(null) }} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="pointer-events-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-200 dark:border-gray-700 max-w-sm w-full">
+              <h3 className="text-lg font-bold dark:text-white mb-2">
+                Cambiar contraseña
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Nueva contraseña para <strong className="dark:text-white">{resetTarget.full_name}</strong>
+              </p>
+              <input
+                type="text"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Escribe la nueva contraseña"
+                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:text-white mb-4"
+                autoFocus
+              />
+              {resetMsg && (
+                <p className={`text-sm mb-3 ${resetMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                  {resetMsg.text}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setResetTarget(null); setResetMsg(null) }}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  disabled={resetting || !newPassword.trim()}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition btn-press disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {resetting ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                  ) : (
+                    <><KeyRound className="w-4 h-4" /> Guardar</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
