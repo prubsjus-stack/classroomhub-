@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { Bell } from 'lucide-react'
@@ -6,6 +7,7 @@ import type { Notification } from '../../types'
 
 export default function NotificationBell() {
   const { profile } = useAuth()
+  const navigate = useNavigate()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
   const unread = notifications.filter(n => !n.read).length
@@ -51,9 +53,17 @@ export default function NotificationBell() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
+  const handleClick = (n: Notification) => {
+    markAsRead(n.id)
+    if (n.type.startsWith('activity:')) {
+      const subjectId = n.type.split(':')[1]
+      if (subjectId) navigate(`/subject/${subjectId}`)
+    }
+  }
+
   const getIcon = (type: string) => {
+    if (type.startsWith('activity')) return '📝'
     switch (type) {
-      case 'activity': return '📝'
       case 'announcement': return '📢'
       case 'warning': return '⚠️'
       default: return 'ℹ️'
@@ -97,7 +107,7 @@ export default function NotificationBell() {
                   className={`flex items-start gap-3 p-4 border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition cursor-pointer ${
                     !n.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                   }`}
-                  onClick={() => markAsRead(n.id)}
+                  onClick={() => handleClick(n)}
                 >
                   <span className="text-lg">{getIcon(n.type)}</span>
                   <div className="flex-1 min-w-0">
