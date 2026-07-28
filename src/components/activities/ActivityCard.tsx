@@ -74,18 +74,6 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
               )}
             </span>
           )}
-          {activity.link_url && (
-            <a
-              href={activity.link_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-blue-600 hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Enlace
-            </a>
-          )}
           {activity.file_url && (
             <a
               href={activity.file_url}
@@ -94,8 +82,11 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
               className="flex items-center gap-1 text-blue-600 hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
-              <FileText className="w-3.5 h-3.5" />
-              {activity.file_name || 'Archivo'}
+              {activity.file_name === '🔗 Enlace' ? (
+                <><ExternalLink className="w-3.5 h-3.5" /> Enlace</>
+              ) : (
+                <><FileText className="w-3.5 h-3.5" /> {activity.file_name || 'Archivo'}</>
+              )}
             </a>
           )}
         </div>

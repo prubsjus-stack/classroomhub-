@@ -19,11 +19,11 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
     due_date: '',
     due_time: '23:59',
     importance: 'media',
-    link_url: '',
   })
   const [file, setFile] = useState<File | null>(null)
   const [fileUrl, setFileUrl] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [linkValue, setLinkValue] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -46,10 +46,15 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         due_date: activity.due_date ? activity.due_date.split('T')[0] : '',
         due_time: activity.due_date ? activity.due_date.split('T')[1]?.slice(0, 5) || '23:59' : '23:59',
         importance: activity.importance,
-        link_url: activity.link_url || '',
       })
-      setFileUrl(activity.file_url)
-      setFileName(activity.file_name)
+      if (activity.file_name === '🔗 Enlace') {
+        setLinkValue(activity.file_url || '')
+        setFileUrl(null)
+        setFileName(null)
+      } else {
+        setFileUrl(activity.file_url)
+        setFileName(activity.file_name)
+      }
     }
     setError('')
   }, [activity])
@@ -71,9 +76,12 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         uploadedUrl = urlData.publicUrl
         uploadedName = file.name
       }
+    } else if (linkValue && !file) {
+      uploadedUrl = linkValue
+      uploadedName = '🔗 Enlace'
     }
 
-    const activityData: Record<string, any> = {
+    const activityData = {
       subject_id: form.subject_id,
       title: form.title,
       description: form.description,
@@ -83,17 +91,10 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
       file_url: uploadedUrl,
       file_name: uploadedName,
     }
-    if (form.link_url) {
-      activityData.link_url = form.link_url
-    }
 
     try {
       if (activity) {
-        const updateData = { ...activityData }
-        if (!form.link_url && activity.link_url) {
-          updateData.link_url = null
-        }
-        const { error: updateErr } = await supabase.from('activities').update(updateData).eq('id', activity.id)
+        const { error: updateErr } = await supabase.from('activities').update(activityData).eq('id', activity.id)
         if (updateErr) throw updateErr
       } else {
         const { data: newActivity, error: insertErr } = await supabase.from('activities').insert(activityData).select().single()
@@ -234,8 +235,8 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
               <Link className="w-4 h-4 text-gray-400 flex-shrink-0" />
               <input
                 type="url"
-                value={form.link_url}
-                onChange={(e) => setForm({ ...form, link_url: e.target.value })}
+                value={linkValue}
+                onChange={(e) => { setLinkValue(e.target.value); setFile(null) }}
                 placeholder="https://ejemplo.com/recurso"
                 className="flex-1 bg-transparent dark:text-white outline-none text-sm"
               />
@@ -257,7 +258,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
                 type="file"
                 accept=".pdf"
                 className="hidden"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => { setFile(e.target.files?.[0] || null); setLinkValue('') }}
               />
             </div>
           </div>

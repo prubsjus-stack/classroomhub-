@@ -30,7 +30,6 @@ export interface Activity {
   due_date: string | null
   file_url: string | null
   file_name: string | null
-  link_url: string | null
   importance: 'baja' | 'media' | 'alta'
   created_at: string
   updated_at: string
