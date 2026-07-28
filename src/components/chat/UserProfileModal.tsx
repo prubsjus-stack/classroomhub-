@@ -12,7 +12,7 @@ export default function UserProfileModal({ user, onClose }: Props) {
   return (
     <>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center pt-48 p-4 pointer-events-none">
         <div className="pointer-events-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-slide-up">
           <button onClick={onClose} className="float-right p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
             <X className="w-5 h-5 dark:text-white" />
