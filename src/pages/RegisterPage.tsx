@@ -69,7 +69,7 @@ export default function RegisterPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition dark:text-white"
-                placeholder="Ej: Justin Mendoza"
+                placeholder="Tu nombre"
               />
             </div>
 
