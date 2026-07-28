@@ -127,6 +127,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+      <div className="absolute bottom-3 right-4 text-white/40 text-xs font-medium">By:Justin</div>
     </div>
   )
 }
