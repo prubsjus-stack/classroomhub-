@@ -125,7 +125,7 @@ export default function ChatHeader() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-2 w-72 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in z-50 flex flex-col" style={{ height: '460px' }}>
+        <div className="absolute right-0 top-full mt-2 w-72 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-fade-in z-50 flex flex-col" style={{ height: '460px' }}>
           {!chatUser ? (
             <>
               <div className="p-4 border-b border-gray-100 dark:border-gray-700">
