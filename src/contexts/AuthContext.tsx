@@ -21,35 +21,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle()
-    if (data) setProfile(data as Profile)
+    try {
+      const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+      if (data) setProfile(data as Profile)
+    } catch (e) {
+      console.error('Error fetching profile:', e)
+    }
   }
 
   useEffect(() => {
-    setLoading(true)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) {
-        fetchProfile(session.user.id)
+    let mounted = true
+
+    const forceStopLoading = setTimeout(() => { if (mounted) setLoading(false) }, 5000)
+
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!mounted) return
+      clearTimeout(forceStopLoading)
+      setSession(s)
+      if (s?.user) {
+        fetchProfile(s.user.id).then(() => { if (mounted) setLoading(false) })
+      } else {
+        setLoading(false)
       }
-      setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session)
-      if (session?.user) {
-        await fetchProfile(session.user.id)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      if (!mounted) return
+      setSession(s)
+      if (s?.user) {
+        fetchProfile(s.user.id)
       } else {
         setProfile(null)
       }
-      setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => { mounted = false; clearTimeout(forceStopLoading); subscription.unsubscribe() }
   }, [])
 
   const signIn = async (username: string, password: string, remember: boolean): Promise<string | null> => {
@@ -57,24 +63,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: `${username}@classroom.local`,
       password,
     })
-
     if (error) {
       if (error.message.includes('Email not confirmed')) return 'Credenciales inválidas'
       if (error.message.includes('Invalid login credentials')) return 'Usuario o contraseña incorrectos'
       return error.message
     }
-
     if (data.user) {
       await supabase.from('profiles').update({ last_sign_in: new Date().toISOString() }).eq('id', data.user.id)
     }
-
-    if (remember) {
-      await supabase.auth.setSession({
-        access_token: data.session!.access_token,
-        refresh_token: data.session!.refresh_token,
-      })
+    if (remember && data.session) {
+      localStorage.setItem('supabase.auth.token', JSON.stringify({
+        currentSession: data.session,
+        expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+      }))
     }
-
     return null
   }
 
@@ -82,17 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email: `${username}@classroom.local`,
       password,
-      options: {
-        data: {
-          username,
-          full_name: fullName,
-        },
-      },
+      options: { data: { username, full_name: fullName } },
     })
-
     if (error) return error.message
     if (!data.user) return 'Error al crear cuenta'
-
     return null
   }
 
@@ -103,20 +98,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const refreshProfile = async () => {
-    if (session?.user) {
-      await fetchProfile(session.user.id)
-    }
+    if (session?.user) await fetchProfile(session.user.id)
   }
 
   return (
     <AuthContext.Provider value={{
-      session,
-      profile,
-      loading,
-      signIn,
-      signUp,
-      signOut,
-      refreshProfile,
+      session, profile, loading,
+      signIn, signUp, signOut, refreshProfile,
       isAdmin: profile?.role === 'admin',
     }}>
       {children}
