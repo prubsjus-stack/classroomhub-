@@ -17,6 +17,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}<div className="fixed bottom-3 right-4 text-gray-400 dark:text-gray-600 text-xs font-medium pointer-events-none select-none z-50">By:Justin</div></>
 }
 
+function AdminRoute({ children }: { children: ReactNode }) {
+  const { isAdmin, loading } = useAuth()
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" /></div>
+  if (!isAdmin) return <Navigate to="/" replace />
+  return <>{children}</>
+}
 
 function PublicRoute({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth()
