@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
-import { Bell } from 'lucide-react'
+import { Bell, Trash2 } from 'lucide-react'
 import type { Notification } from '../../types'
 
 export default function NotificationBell() {
@@ -25,6 +25,14 @@ export default function NotificationBell() {
         filter: `user_id=eq.${profile.id}`,
       }, (payload: any) => {
         setNotifications(prev => [payload.new as Notification, ...prev])
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${profile.id}`,
+      }, (payload: any) => {
+        setNotifications(prev => prev.filter(n => n.id !== payload.old.id))
       })
       .subscribe()
 
@@ -59,6 +67,12 @@ export default function NotificationBell() {
       const subjectId = n.type.split(':')[1]
       if (subjectId) navigate(`/subject/${subjectId}`)
     }
+  }
+
+  const deleteNotification = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    await supabase.from('notifications').delete().eq('id', id)
+    setNotifications(prev => prev.filter(n => n.id !== id))
   }
 
   const getIcon = (type: string) => {
@@ -117,7 +131,15 @@ export default function NotificationBell() {
                       {new Date(n.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
-                  {!n.read && <div className="w-2 h-2 bg-blue-600 rounded-full mt-1.5 flex-shrink-0" />}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {!n.read && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                    <button
+                      onClick={(e) => deleteNotification(e, n.id)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}
