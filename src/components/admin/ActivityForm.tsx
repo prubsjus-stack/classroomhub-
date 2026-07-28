@@ -68,14 +68,18 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
     let uploadedName = fileName
 
     if (file) {
+      await supabase.storage.createBucket('files', { public: true }).catch(() => {})
       const ext = file.name.split('.').pop()
       const filePath = `activities/${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('files').upload(filePath, file)
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage.from('files').getPublicUrl(filePath)
-        uploadedUrl = urlData.publicUrl
-        uploadedName = file.name
+      const { error: uploadError } = await supabase.storage.from('files').upload(filePath, file, { upsert: true })
+      if (uploadError) {
+        setError(`Error al subir archivo: ${uploadError.message}`)
+        setSubmitting(false)
+        return
       }
+      const { data: urlData } = supabase.storage.from('files').getPublicUrl(filePath)
+      uploadedUrl = urlData.publicUrl
+      uploadedName = file.name
     } else if (linkValue && !file) {
       uploadedUrl = linkValue
       uploadedName = '🔗 Enlace'
