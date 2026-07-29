@@ -21,14 +21,17 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    if (!profile) return
+    if (!profile) {
+      setChecking(false)
+      return
+    }
     supabase.from('site_config').select('*').single().then(({ data }) => {
       if (data) setMaintenance(data as SiteConfig)
       setChecking(false)
     })
   }, [profile])
 
-  if (loading || checking) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" /></div>
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" /></div>
   if (!session) return <Navigate to="/login" replace />
   if (maintenance?.maintenance_mode && !isAdmin) return <MaintenancePage />
   return <>{children}<FeedbackButton /><div className="fixed bottom-3 right-4 text-gray-400 dark:text-gray-600 text-xs font-medium pointer-events-none select-none z-50">By:Justin</div></>
