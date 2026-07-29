@@ -18,7 +18,7 @@ import type { SiteConfig } from './types'
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, loading, isAdmin, profile } = useAuth()
   const [maintenance, setMaintenance] = useState<SiteConfig | null>(null)
-  const [checking, setChecking] = useState(true)
+  const [, setChecking] = useState(true)
 
   useEffect(() => {
     if (!profile) {
