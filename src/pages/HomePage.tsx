@@ -44,9 +44,10 @@ export default function HomePage() {
     const acts = (activitiesData.data || []) as Activity[]
     const comps = (completionsData.data || []) as Completion[]
     const completedIds = new Set(comps.map(c => c.activity_id))
+    const isInfo = (a: Activity) => a.pinned || a.type === 'informacion'
 
     const subjectsWithStats: SubjectWithStats[] = subjectsData.data.map((s: Subject) => {
-      const subjectActs = acts.filter(a => a.subject_id === s.id)
+      const subjectActs = acts.filter(a => a.subject_id === s.id && !isInfo(a))
       const totalCount = subjectActs.length
       const completedCount = subjectActs.filter(a => completedIds.has(a.id)).length
       const pendingCount = totalCount - completedCount
