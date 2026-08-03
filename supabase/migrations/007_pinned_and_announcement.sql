@@ -3,6 +3,11 @@
 -- Starred/info activities (always on top, not counted, not completable)
 ALTER TABLE public.activities ADD COLUMN IF NOT EXISTS pinned BOOLEAN DEFAULT false;
 
+-- Allow the new 'informacion' type
+ALTER TABLE public.activities DROP CONSTRAINT IF EXISTS activities_type_check;
+ALTER TABLE public.activities ADD CONSTRAINT activities_type_check
+  CHECK (type IN ('actividad', 'taller', 'quiz', 'parcial', 'laboratorio', 'proyecto', 'anuncio', 'informacion'));
+
 -- Announcement (version + changelog) shown on login
 ALTER TABLE public.site_config ADD COLUMN IF NOT EXISTS announcement_title TEXT DEFAULT '';
 ALTER TABLE public.site_config ADD COLUMN IF NOT EXISTS announcement_content TEXT DEFAULT '';

@@ -31,7 +31,7 @@ CREATE TABLE public.activities (
   subject_id UUID REFERENCES public.subjects(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
   description TEXT DEFAULT '',
-  type TEXT NOT NULL CHECK (type IN ('actividad', 'taller', 'quiz', 'parcial', 'laboratorio', 'proyecto', 'anuncio')),
+  type TEXT NOT NULL CHECK (type IN ('actividad', 'taller', 'quiz', 'parcial', 'laboratorio', 'proyecto', 'anuncio', 'informacion')),
   due_date TIMESTAMPTZ,
   file_url TEXT,
   file_name TEXT,

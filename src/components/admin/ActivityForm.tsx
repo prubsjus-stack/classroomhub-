@@ -47,7 +47,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         due_date: activity.due_date ? activity.due_date.split('T')[0] : '',
         due_time: activity.due_date ? activity.due_date.split('T')[1]?.slice(0, 5) || '23:59' : '23:59',
         importance: activity.importance,
-        pinned: activity.pinned,
+        pinned: activity.pinned || activity.type === 'informacion',
       })
       if (activity.file_name === '🔗 Enlace') {
         setLinkValue(activity.file_url || '')
@@ -159,7 +159,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
             <label className="block text-sm font-medium dark:text-gray-300 mb-1">Tipo</label>
             <select
               value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              onChange={(e) => setForm({ ...form, type: e.target.value, pinned: e.target.value === 'informacion' ? true : form.pinned })}
               className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:bg-gray-800 dark:text-white"
             >
               {ACTIVITY_TYPES.map((t) => (
@@ -248,25 +248,37 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setForm({ ...form, pinned: !form.pinned })}
-          className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition ${
-            form.pinned
-              ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
-              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
-          }`}
-        >
-          <Star className={`w-5 h-5 flex-shrink-0 ${form.pinned ? 'text-yellow-500 fill-yellow-400' : 'text-gray-400'}`} />
-          <div className="text-left">
-            <p className={`text-sm font-medium ${form.pinned ? 'text-yellow-600 dark:text-yellow-400' : 'dark:text-white'}`}>
-              {form.pinned ? 'Fijada como información ⭐' : 'Fijar como información'}
-            </p>
-            <p className="text-xs text-gray-500">
-              Aparece siempre arriba en la materia. No cuenta como actividad/tarea y los estudiantes no pueden marcarla como realizada.
-            </p>
+        {form.type === 'informacion' ? (
+          <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20">
+            <Star className="w-5 h-5 flex-shrink-0 text-yellow-500 fill-yellow-400" />
+            <div className="text-left">
+              <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Información de la materia ⭐</p>
+              <p className="text-xs text-gray-500">
+                Se fija con estrella en esta materia, siempre arriba. No cuenta como actividad/tarea y los estudiantes no pueden marcarla como realizada.
+              </p>
+            </div>
           </div>
-        </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, pinned: !form.pinned })}
+            className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition ${
+              form.pinned
+                ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
+            }`}
+          >
+            <Star className={`w-5 h-5 flex-shrink-0 ${form.pinned ? 'text-yellow-500 fill-yellow-400' : 'text-gray-400'}`} />
+            <div className="text-left">
+              <p className={`text-sm font-medium ${form.pinned ? 'text-yellow-600 dark:text-yellow-400' : 'dark:text-white'}`}>
+                {form.pinned ? 'Fijada como información ⭐' : 'Fijar como información'}
+              </p>
+              <p className="text-xs text-gray-500">
+                Aparece siempre arriba en la materia. No cuenta como actividad/tarea y los estudiantes no pueden marcarla como realizada.
+              </p>
+            </div>
+          </button>
+        )}
 
         <div>
           <label className="block text-sm font-medium dark:text-gray-300 mb-2">Archivo o enlace (opcional)</label>

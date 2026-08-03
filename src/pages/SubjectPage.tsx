@@ -72,12 +72,14 @@ export default function SubjectPage() {
     })
   }
 
-  const totalCount = activities.filter(a => !a.pinned).length
-  const completedCount = activities.filter(a => !a.pinned && completions.has(a.id)).length
+  const totalCount = activities.filter(a => !a.pinned && a.type !== 'informacion').length
+  const completedCount = activities.filter(a => !a.pinned && a.type !== 'informacion' && completions.has(a.id)).length
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
+  const isPinned = (a: Activity) => a.pinned || a.type === 'informacion'
+
   const sortedActivities = [...activities].sort((a, b) => {
-    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
+    if (isPinned(a) !== isPinned(b)) return isPinned(a) ? -1 : 1
     const aDue = a.due_date ? new Date(a.due_date).getTime() : Infinity
     const bDue = b.due_date ? new Date(b.due_date).getTime() : Infinity
     return aDue - bDue

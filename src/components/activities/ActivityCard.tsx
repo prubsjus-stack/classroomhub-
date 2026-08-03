@@ -20,7 +20,9 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
   const isOverdue = dueDate && dueDate < now && !completed
   const isUrgent = daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue <= 3 && !completed
 
-  if (activity.pinned) {
+  const isPinned = activity.pinned || activity.type === 'informacion'
+
+  if (isPinned) {
     return (
       <button
         onClick={onOpen}

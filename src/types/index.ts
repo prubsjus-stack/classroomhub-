@@ -26,7 +26,7 @@ export interface Activity {
   subject_id: string
   title: string
   description: string
-  type: 'actividad' | 'taller' | 'quiz' | 'parcial' | 'laboratorio' | 'proyecto' | 'anuncio'
+  type: 'actividad' | 'taller' | 'quiz' | 'parcial' | 'laboratorio' | 'proyecto' | 'anuncio' | 'informacion'
   due_date: string | null
   file_url: string | null
   file_name: string | null
@@ -97,6 +97,7 @@ export const ACTIVITY_TYPES = [
   { value: 'laboratorio', label: 'Laboratorio', color: 'bg-green-100 text-green-700' },
   { value: 'proyecto', label: 'Proyecto', color: 'bg-gray-100 text-gray-700' },
   { value: 'anuncio', label: 'Anuncio', color: 'bg-orange-100 text-orange-700' },
+  { value: 'informacion', label: 'Información', color: 'bg-yellow-100 text-yellow-700' },
 ] as const
 
 export const SUBJECT_ICONS: Record<string, string> = {
