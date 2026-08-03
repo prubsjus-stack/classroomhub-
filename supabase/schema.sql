@@ -36,6 +36,7 @@ CREATE TABLE public.activities (
   file_url TEXT,
   file_name TEXT,
   importance TEXT DEFAULT 'media' CHECK (importance IN ('baja', 'media', 'alta')),
+  pinned BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -65,6 +66,36 @@ CREATE TABLE public.notifications (
   title TEXT NOT NULL,
   message TEXT NOT NULL,
   type TEXT NOT NULL DEFAULT 'info',
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Site config (maintenance mode, announcements)
+CREATE TABLE public.site_config (
+  id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  maintenance_mode BOOLEAN DEFAULT false,
+  maintenance_message TEXT DEFAULT '',
+  maintenance_eta TEXT DEFAULT '',
+  announcement_title TEXT DEFAULT '',
+  announcement_content TEXT DEFAULT ''
+);
+
+-- Chat messages
+CREATE TABLE public.messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  receiver_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Feedback
+CREATE TABLE public.feedback (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('error', 'recomendacion', 'comentario_positivo')),
+  message TEXT NOT NULL,
   read BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -166,6 +197,9 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.activities;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.subjects;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.completions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.feedback;
 
 -- Function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()

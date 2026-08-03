@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import Header from '../components/layout/Header'
 import ActivityCard from '../components/activities/ActivityCard'
+import ActivityDetailModal from '../components/activities/ActivityDetailModal'
 import CompletionAnimation from '../components/activities/CompletionAnimation'
 import type { Subject, Activity, Completion } from '../types'
 import { ArrowLeft, BookOpen } from 'lucide-react'
@@ -17,6 +18,7 @@ export default function SubjectPage() {
   const [completions, setCompletions] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [completionAnim, setCompletionAnim] = useState<{ show: boolean; title: string }>({ show: false, title: '' })
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -70,11 +72,12 @@ export default function SubjectPage() {
     })
   }
 
-  const totalCount = activities.length
-  const completedCount = activities.filter(a => completions.has(a.id)).length
+  const totalCount = activities.filter(a => !a.pinned).length
+  const completedCount = activities.filter(a => !a.pinned && completions.has(a.id)).length
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
   const sortedActivities = [...activities].sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
     const aDue = a.due_date ? new Date(a.due_date).getTime() : Infinity
     const bDue = b.due_date ? new Date(b.due_date).getTime() : Infinity
     return aDue - bDue
@@ -153,6 +156,7 @@ export default function SubjectPage() {
                   completed={completions.has(activity.id)}
                   onComplete={() => handleComplete(activity.id, activity.title)}
                   onCancel={() => handleUncomplete(activity.id)}
+                  onOpen={() => setSelectedActivity(activity)}
                   showAnimation={completionAnim.show && completionAnim.title === activity.title}
                 />
               ))
@@ -166,6 +170,10 @@ export default function SubjectPage() {
         title={completionAnim.title}
         onClose={() => setCompletionAnim({ show: false, title: '' })}
       />
+
+      {selectedActivity && (
+        <ActivityDetailModal activity={selectedActivity} onClose={() => setSelectedActivity(null)} />
+      )}
     </div>
   )
 }

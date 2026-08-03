@@ -14,7 +14,7 @@ export default function HelpHeader() {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center pt-64 p-4" onClick={() => setOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-32" onClick={() => setOpen(false)}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div
               className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full animate-slide-up"
@@ -32,6 +32,8 @@ export default function HelpHeader() {
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monitor</p>
                   <p className="font-semibold dark:text-white">JUSTIN DAVID MENDOZA ORTIZ</p>
                 </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Teléfono</p>
+                <p className="text-lg font-bold dark:text-white mb-6">3228825610</p>
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl transition btn-press"
                 >

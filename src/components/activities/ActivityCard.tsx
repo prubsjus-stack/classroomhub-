@@ -1,16 +1,17 @@
 import type { Activity } from '../../types'
 import { ACTIVITY_TYPES } from '../../types'
-import { Check, FileText, AlertTriangle, ExternalLink } from 'lucide-react'
+import { Check, FileText, AlertTriangle, ExternalLink, Star, Eye } from 'lucide-react'
 
 interface ActivityCardProps {
   activity: Activity
   completed: boolean
   onComplete: () => void
   onCancel?: () => void
+  onOpen?: () => void
   showAnimation?: boolean
 }
 
-export default function ActivityCard({ activity, completed, onComplete, onCancel }: ActivityCardProps) {
+export default function ActivityCard({ activity, completed, onComplete, onCancel, onOpen }: ActivityCardProps) {
   const typeConfig = ACTIVITY_TYPES.find((t: { value: string }) => t.value === activity.type) || ACTIVITY_TYPES[0]
   const dueDate = activity.due_date ? new Date(activity.due_date) : null
   const now = new Date()
@@ -18,6 +19,53 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
 
   const isOverdue = dueDate && dueDate < now && !completed
   const isUrgent = daysUntilDue !== null && daysUntilDue >= 0 && daysUntilDue <= 3 && !completed
+
+  if (activity.pinned) {
+    return (
+      <button
+        onClick={onOpen}
+        className="w-full text-left relative rounded-2xl border-2 border-yellow-300 dark:border-yellow-600 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/10 p-5 transition hover:shadow-md hover:scale-[1.01] btn-press"
+      >
+        <div className="absolute -top-3 left-4 px-3 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
+          <Star className="w-3 h-3 fill-current" /> INFORMACIÓN
+        </div>
+        <div className="flex items-start justify-between mb-3 mt-2">
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-yellow-500 fill-yellow-400" />
+            <span className="text-xs font-medium text-yellow-700 dark:text-yellow-400">Fijada por el profesor</span>
+          </div>
+          {activity.importance === 'alta' && (
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+          )}
+        </div>
+
+        <h4 className="font-semibold text-base mb-1 dark:text-white">{activity.title}</h4>
+        {activity.description && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">{activity.description}</p>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mb-4">
+          {activity.file_url && (
+            <span
+              className="flex items-center gap-1 text-blue-600"
+              onClick={(e) => { e.stopPropagation(); if (activity.file_url) window.open(activity.file_url, '_blank') }}
+            >
+              {activity.file_name === '🔗 Enlace' ? (
+                <><ExternalLink className="w-3.5 h-3.5" /> Enlace</>
+              ) : (
+                <><FileText className="w-3.5 h-3.5" /> {activity.file_name || 'Archivo'}</>
+              )}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-xl transition btn-press w-fit">
+          <Eye className="w-4 h-4" />
+          Ver información
+        </div>
+      </button>
+    )
+  }
 
   return (
     <div className={`relative rounded-2xl border transition-all duration-300 ${

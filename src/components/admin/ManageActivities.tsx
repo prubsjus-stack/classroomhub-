@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import ActivityForm from './ActivityForm'
 import type { Activity, Subject } from '../../types'
 import { ACTIVITY_TYPES } from '../../types'
-import { Plus, Edit3, Trash2 } from 'lucide-react'
+import { Plus, Edit3, Trash2, Star } from 'lucide-react'
 
 export default function ManageActivities() {
   const [activities, setActivities] = useState<(Activity & { subjects?: Subject })[]>([])
@@ -35,6 +35,11 @@ export default function ManageActivities() {
   const deleteActivity = async (id: string) => {
     if (!confirm('¿Eliminar esta actividad?')) return
     await supabase.from('activities').delete().eq('id', id)
+    loadData()
+  }
+
+  const togglePinned = async (act: Activity) => {
+    await supabase.from('activities').update({ pinned: !act.pinned }).eq('id', act.id)
     loadData()
   }
 
@@ -83,6 +88,11 @@ export default function ManageActivities() {
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                     {getTypeLabel(act.type)}
                   </span>
+                  {act.pinned && (
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                      ⭐ Información
+                    </span>
+                  )}
                   <span className="text-xs text-gray-500">{getSubjectName(act.subject_id)}</span>
                   {act.due_date && (
                     <span className="text-xs text-gray-400">
@@ -96,6 +106,13 @@ export default function ManageActivities() {
                 )}
               </div>
               <div className="flex items-center gap-1 ml-4">
+                <button
+                  onClick={() => togglePinned(act)}
+                  title={act.pinned ? 'Desfijar información' : 'Fijar como información'}
+                  className={`p-2 rounded-lg transition ${act.pinned ? 'bg-yellow-100 dark:bg-yellow-900/30' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                >
+                  <Star className={`w-4 h-4 ${act.pinned ? 'text-yellow-500 fill-yellow-400' : 'text-gray-400'}`} />
+                </button>
                 <button
                   onClick={() => setEditingActivity(act)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"

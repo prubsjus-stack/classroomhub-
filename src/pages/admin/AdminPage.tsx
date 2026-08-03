@@ -7,14 +7,16 @@ import ManageSubjects from '../../components/admin/ManageSubjects'
 import ManageUsers from '../../components/admin/ManageUsers'
 import AdminMaintenance from '../../components/admin/AdminMaintenance'
 import AdminFeedback from '../../components/admin/AdminFeedback'
+import AdminAnnouncement from '../../components/admin/AdminAnnouncement'
 import ActivityForm from '../../components/admin/ActivityForm'
-import { LayoutDashboard, FileText, BookOpen, Users, Construction, MessageCircle, Plus, X } from 'lucide-react'
+import { LayoutDashboard, FileText, BookOpen, Users, Construction, MessageCircle, Megaphone, Plus, X } from 'lucide-react'
 
 const NAV_ITEMS = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { path: '/admin/activities', label: 'Actividades', icon: FileText },
   { path: '/admin/subjects', label: 'Materias', icon: BookOpen },
   { path: '/admin/users', label: 'Usuarios', icon: Users },
+  { path: '/admin/announcement', label: 'Anuncio', icon: Megaphone },
   { path: '/admin/maintenance', label: 'Mantenimiento', icon: Construction },
   { path: '/admin/feedback', label: 'Feedback', icon: MessageCircle },
 ]
@@ -61,6 +63,7 @@ export default function AdminPage() {
             <Route path="activities" element={<ManageActivities />} />
             <Route path="subjects" element={<ManageSubjects />} />
             <Route path="users" element={<ManageUsers />} />
+            <Route path="announcement" element={<AdminAnnouncement />} />
             <Route path="maintenance" element={<AdminMaintenance />} />
             <Route path="feedback" element={<AdminFeedback />} />
           </Routes>

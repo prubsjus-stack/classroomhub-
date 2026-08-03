@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useClickOutside } from '../../hooks/useClickOutside'
 import type { Profile, Message } from '../../types'
 import UserProfileModal from './UserProfileModal'
 import { MessageCircle, Send, ArrowLeft, Crown } from 'lucide-react'
@@ -15,6 +16,21 @@ export default function ChatHeader() {
   const [newMsg, setNewMsg] = useState('')
   const [unread, setUnread] = useState(0)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const containerRef = useClickOutside<HTMLDivElement>(() => setOpen(false))
+
+  const refreshUnread = async () => {
+    if (!profile) return
+    const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', profile.id).is('read', false)
+    if (count !== null) setUnread(count)
+  }
+
+  const markAsRead = async (forUser?: Profile) => {
+    const target = forUser || chatUser
+    if (!profile || !target) return
+    await supabase.from('messages').update({ read: true }).eq('receiver_id', profile.id).eq('sender_id', target.id).is('read', false)
+    setMessages(prev => prev.map(m => m.sender_id === target.id ? { ...m, read: true } : m))
+    refreshUnread()
+  }
 
   useEffect(() => {
     if (!profile) return
@@ -26,24 +42,28 @@ export default function ChatHeader() {
         schema: 'public',
         table: 'messages',
         filter: `receiver_id=eq.${profile.id}`,
-      }, () => {
-        setUnread(prev => prev + 1)
+      }, async (payload: any) => {
+        const m = payload.new as Message
+        if (chatUser && m.sender_id === chatUser.id) {
+          await supabase.from('messages').update({ read: true }).eq('id', m.id)
+          setMessages(prev => {
+            if (prev.some(p => p.id === m.id)) return prev
+            return [...prev, { ...m, read: true }]
+          })
+          refreshUnread()
+        } else {
+          setUnread(prev => prev + 1)
+        }
       })
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
-  }, [profile])
+  }, [profile, chatUser?.id])
 
   const loadUnread = async () => {
     if (!profile) return
     const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', profile.id).is('read', false)
     if (count !== null) setUnread(count)
-  }
-
-  const markAsRead = async () => {
-    if (!profile || !chatUser) return
-    await supabase.from('messages').update({ read: true }).eq('receiver_id', profile.id).eq('sender_id', chatUser.id).is('read', false)
-    setUnread(prev => Math.max(0, prev - messages.filter(m => m.sender_id === chatUser.id && !m.read !== false).length))
   }
 
   useEffect(() => {
@@ -66,7 +86,10 @@ export default function ChatHeader() {
       }, (payload: any) => {
         const m = payload.new as Message
         if (m.sender_id === chatUser.id || m.receiver_id === chatUser.id) {
-          setMessages(prev => [...prev, m])
+          setMessages(prev => {
+            if (prev.some(p => p.id === m.id)) return prev
+            return [...prev, m]
+          })
         }
       })
       .subscribe()
@@ -113,10 +136,17 @@ export default function ChatHeader() {
     }
   }
 
+  const openChat = (u: Profile) => {
+    setChatUser(u)
+    setTimeout(() => {
+      markAsRead(u)
+    }, 200)
+  }
+
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button onClick={() => setOpen(!open)} className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
         <MessageCircle className="w-5 h-5 dark:text-white" />
         {unread > 0 && (
@@ -136,7 +166,7 @@ export default function ChatHeader() {
               </div>
               <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 {users.map(u => (
-                  <button key={u.id} onClick={() => { setChatUser(u); setTimeout(markAsRead, 100) }}
+                  <button key={u.id} onClick={() => openChat(u)}
                     className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition text-left"
                   >
                     {u.avatar_url ? (

@@ -31,6 +31,7 @@ export interface Activity {
   file_url: string | null
   file_name: string | null
   importance: 'baja' | 'media' | 'alta'
+  pinned: boolean
   created_at: string
   updated_at: string
 }
@@ -54,6 +55,8 @@ export interface SiteConfig {
   maintenance_mode: boolean
   maintenance_message: string
   maintenance_eta: string
+  announcement_title: string
+  announcement_content: string
 }
 
 export interface Message {

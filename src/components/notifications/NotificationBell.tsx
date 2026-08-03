@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useClickOutside } from '../../hooks/useClickOutside'
 import { Bell, Trash2 } from 'lucide-react'
 import type { Notification } from '../../types'
 
@@ -11,6 +12,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
   const unread = notifications.filter(n => !n.read).length
+  const containerRef = useClickOutside<HTMLDivElement>(() => setOpen(false))
 
   useEffect(() => {
     if (!profile) return
@@ -85,7 +87,7 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={() => setOpen(!open)}
         className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
