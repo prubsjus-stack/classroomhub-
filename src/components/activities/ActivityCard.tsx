@@ -34,7 +34,7 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
         <div className="flex items-start justify-between mb-3 mt-2">
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 text-yellow-500 fill-yellow-400" />
-            <span className="text-xs font-medium text-yellow-700 dark:text-yellow-400">Fijada por el profesor</span>
+            <span className="text-xs font-medium text-yellow-700 dark:text-yellow-400">Información de la materia</span>
           </div>
           {activity.importance === 'alta' && (
             <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -142,17 +142,33 @@ export default function ActivityCard({ activity, completed, onComplete, onCancel
         </div>
 
         {!completed && (
-          <button
-            onClick={onComplete}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition btn-press"
-          >
-            <Check className="w-4 h-4" />
-            Marcar como realizada
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onOpen}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl transition btn-press"
+            >
+              <Eye className="w-4 h-4" />
+              Ver actividad
+            </button>
+            <button
+              onClick={onComplete}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition btn-press"
+            >
+              <Check className="w-4 h-4" />
+              Marcar como realizada
+            </button>
+          </div>
         )}
 
         {completed && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={onOpen}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl transition btn-press"
+            >
+              <Eye className="w-4 h-4" />
+              Ver actividad
+            </button>
             <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium rounded-xl">
               <Check className="w-4 h-4" />
               Completado
