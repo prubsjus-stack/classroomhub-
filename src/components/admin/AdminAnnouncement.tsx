@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import type { SiteConfig } from '../../types'
 import { Megaphone } from 'lucide-react'
 
 export default function AdminAnnouncement() {
