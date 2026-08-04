@@ -4,7 +4,7 @@ import type { SiteConfig } from '../../types'
 import { Construction, Clock } from 'lucide-react'
 
 export default function AdminMaintenance() {
-  const [config, setConfig] = useState<SiteConfig>({ maintenance_mode: false, maintenance_message: '', maintenance_eta: '', announcement_title: '', announcement_content: '' })
+  const [config, setConfig] = useState<SiteConfig>({ maintenance_mode: false, maintenance_message: '', maintenance_eta: '', announcement_enabled: false, announcement_title: '', announcement_content: '' })
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
 

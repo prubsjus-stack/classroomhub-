@@ -7,6 +7,7 @@ export interface Profile {
   bio: string
   welcome_shown: boolean
   theme: 'light' | 'dark' | 'system'
+  kicked: boolean
   created_at: string
   last_sign_in: string
 }
@@ -55,6 +56,7 @@ export interface SiteConfig {
   maintenance_mode: boolean
   maintenance_message: string
   maintenance_eta: string
+  announcement_enabled: boolean
   announcement_title: string
   announcement_content: string
 }

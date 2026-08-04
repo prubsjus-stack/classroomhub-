@@ -10,6 +10,7 @@ CREATE TABLE public.profiles (
   bio TEXT DEFAULT '',
   welcome_shown BOOLEAN DEFAULT false,
   theme TEXT DEFAULT 'system' CHECK (theme IN ('light', 'dark', 'system')),
+  kicked BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
   last_sign_in TIMESTAMPTZ DEFAULT now()
 );
@@ -77,7 +78,8 @@ CREATE TABLE public.site_config (
   maintenance_message TEXT DEFAULT '',
   maintenance_eta TEXT DEFAULT '',
   announcement_title TEXT DEFAULT '',
-  announcement_content TEXT DEFAULT ''
+  announcement_content TEXT DEFAULT '',
+  announcement_enabled BOOLEAN DEFAULT false
 );
 
 -- Chat messages

@@ -58,6 +58,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { mounted = false; clearTimeout(forceStopLoading); subscription.unsubscribe() }
   }, [])
 
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId) return
+
+    const checkKicked = async () => {
+      try {
+        const { data } = await supabase.from('profiles').select('kicked').eq('id', userId).maybeSingle()
+        if (data?.kicked) {
+          await signOut()
+        }
+      } catch (e) {
+        // ignore transient errors
+      }
+    }
+
+    checkKicked()
+    const id = setInterval(checkKicked, 5000)
+    return () => clearInterval(id)
+  }, [session?.user?.id])
+
   const signIn = async (username: string, password: string, remember: boolean): Promise<string | null> => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: `${username}@classroom.local`,
@@ -69,7 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return error.message
     }
     if (data.user) {
-      await supabase.from('profiles').update({ last_sign_in: new Date().toISOString() }).eq('id', data.user.id)
+      await supabase.from('profiles').update({
+        last_sign_in: new Date().toISOString(),
+        kicked: false,
+      }).eq('id', data.user.id)
     }
     if (remember && data.session) {
       localStorage.setItem('supabase.auth.token', JSON.stringify({

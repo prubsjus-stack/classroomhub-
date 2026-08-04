@@ -22,7 +22,7 @@ export default function ChatButton() {
   }, [open])
 
   const loadUsers = async () => {
-    const { data } = await supabase.from('profiles').select('*').neq('id', profile?.id).order('role', { ascending: false })
+    const { data } = await supabase.from('profiles').select('*').neq('id', profile?.id).neq('kicked', true).order('role', { ascending: false })
     if (data) setUsers(data as Profile[])
   }
 

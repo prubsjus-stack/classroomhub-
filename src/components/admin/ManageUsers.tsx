@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { Profile } from '../../types'
-import { Search, Crown, KeyRound } from 'lucide-react'
+import { Search, Crown, KeyRound, LogOut, UserCheck } from 'lucide-react'
 
 export default function ManageUsers() {
   const [users, setUsers] = useState<(Profile & { adminCount?: number })[]>([])
@@ -60,10 +60,23 @@ export default function ManageUsers() {
     setResetting(false)
   }
 
-  const filtered = users.filter(u =>
+  const filtered = users.filter(u => !u.kicked && (
     u.full_name.toLowerCase().includes(search.toLowerCase()) ||
     u.username.toLowerCase().includes(search.toLowerCase())
-  )
+  ))
+
+  const kickedUsers = users.filter(u => u.kicked)
+
+  const kickUser = async (user: Profile) => {
+    if (!confirm(`¿Expulsar a "${user.full_name}"? Se le cerrará la sesión y desaparecerá de las listas hasta que vuelva a ingresar.`)) return
+    await supabase.from('profiles').update({ kicked: true }).eq('id', user.id)
+    loadUsers()
+  }
+
+  const reinstateUser = async (user: Profile) => {
+    await supabase.from('profiles').update({ kicked: false }).eq('id', user.id)
+    loadUsers()
+  }
 
   return (
     <div>
@@ -155,6 +168,11 @@ export default function ManageUsers() {
                       <button onClick={() => { setResetTarget(user); setNewPassword(''); setResetMsg(null) }} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition whitespace-nowrap">
                         <KeyRound className="w-3 h-3" /> Cambiar contraseña
                       </button>
+                      {user.role !== 'admin' && (
+                        <button onClick={() => kickUser(user)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition whitespace-nowrap">
+                          <LogOut className="w-3 h-3" /> Expulsar
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -167,6 +185,37 @@ export default function ManageUsers() {
           <div className="text-center py-12 text-gray-500">No se encontraron usuarios</div>
         )}
       </div>
+
+      {kickedUsers.length > 0 && (
+        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-orange-200 dark:border-orange-900/50 overflow-hidden">
+          <div className="px-4 py-3 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-900/40 flex items-center gap-2">
+            <LogOut className="w-4 h-4 text-orange-600" />
+            <h3 className="font-semibold text-orange-700 dark:text-orange-300">
+              Usuarios expulsados ({kickedUsers.length}) — volverán al iniciar sesión
+            </h3>
+          </div>
+          <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+            {kickedUsers.map((user) => (
+              <div key={user.id} className="flex items-center gap-3 px-4 py-3">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold">
+                    {user.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium dark:text-white truncate">{user.full_name}</p>
+                  <p className="text-xs text-gray-500">@{user.username}</p>
+                </div>
+                <button onClick={() => reinstateUser(user)} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition whitespace-nowrap">
+                  <UserCheck className="w-3 h-3" /> Reintegrar
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {resetTarget && (
         <>

@@ -20,7 +20,6 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, loading, isAdmin, profile } = useAuth()
   const [maintenance, setMaintenance] = useState<SiteConfig | null>(null)
   const [announcement, setAnnouncement] = useState<SiteConfig | null>(null)
-  const [announcementDismissed, setAnnouncementDismissed] = useState(true)
 
   useEffect(() => {
     if (!profile) return
@@ -28,22 +27,16 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
       if (!data) return
       setMaintenance(data as SiteConfig)
       const cfg = data as SiteConfig
-      if (cfg.announcement_title && cfg.announcement_content) {
-        const key = `classroomhub_announcement_${cfg.announcement_title}_${cfg.announcement_content.length}`
-        if (!sessionStorage.getItem(key)) {
-          setAnnouncement(cfg)
-          setAnnouncementDismissed(false)
-        }
+      if (cfg.announcement_enabled && cfg.announcement_title && cfg.announcement_content) {
+        setAnnouncement(cfg)
+      } else {
+        setAnnouncement(null)
       }
     })
   }, [profile])
 
   const closeAnnouncement = () => {
-    if (announcement) {
-      sessionStorage.setItem(`classroomhub_announcement_${announcement.announcement_title}_${announcement.announcement_content.length}`, '1')
-    }
     setAnnouncement(null)
-    setAnnouncementDismissed(true)
   }
 
   if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" /></div>
@@ -54,7 +47,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
       {children}
       <FeedbackButton />
       <div className="fixed bottom-3 right-4 text-gray-400 dark:text-gray-600 text-xs font-medium pointer-events-none select-none z-50">By:Justin</div>
-      {announcement && !announcementDismissed && (
+      {announcement && (
         <AnnouncementModal
           title={announcement.announcement_title}
           content={announcement.announcement_content}

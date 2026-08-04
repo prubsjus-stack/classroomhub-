@@ -105,7 +105,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         if (updateErr) throw updateErr
 
         const subjectName = subjects.find(sub => sub.id === form.subject_id)?.name || ''
-        const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin')
+        const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin').neq('kicked', true)
         if (students) {
           const notifications = students.map((s: { id: string }) => ({
             user_id: s.id,
@@ -120,7 +120,7 @@ export default function ActivityForm({ activity, onClose }: ActivityFormProps) {
         if (insertErr) throw insertErr
 
         if (newActivity) {
-          const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin')
+          const { data: students } = await supabase.from('profiles').select('id').neq('role', 'admin').neq('kicked', true)
           if (students) {
           const subjectName = subjects.find(sub => sub.id === form.subject_id)?.name || ''
           const notifications = students.map((s: { id: string }) => ({

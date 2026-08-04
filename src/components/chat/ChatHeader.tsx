@@ -68,7 +68,7 @@ export default function ChatHeader() {
 
   useEffect(() => {
     if (!open) { setChatUser(null); setMessages([]); return }
-    supabase.from('profiles').select('*').neq('id', profile?.id).order('role', { ascending: false }).then(({ data }) => {
+    supabase.from('profiles').select('*').neq('id', profile?.id).neq('kicked', true).order('role', { ascending: false }).then(({ data }) => {
       if (data) setUsers(data as Profile[])
     })
   }, [open, profile?.id])

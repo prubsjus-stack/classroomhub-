@@ -25,20 +25,23 @@ export default function AdminDashboard() {
   }, [])
 
   const loadStats = async () => {
-    const [profiles, activities, subjects, completions] = await Promise.all([
+    const [profiles, activitiesRes, subjects, completions, recentRes] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('activities').select('*', { count: 'exact', head: true }),
+      supabase.from('activities').select('*'),
       supabase.from('subjects').select('*', { count: 'exact', head: true }),
       supabase.from('completions').select('*', { count: 'exact', head: true }),
       supabase.from('activities').select('*, subjects(name)').order('created_at', { ascending: false }).limit(5),
     ])
 
+    const allActivities = (activitiesRes.data || []) as Activity[]
+    const realActivities = allActivities.filter((a) => !a.pinned && a.type !== 'informacion')
+
     setStats({
       totalStudents: profiles.count || 0,
-      totalActivities: activities.count || 0,
+      totalActivities: realActivities.length,
       totalSubjects: subjects.count || 0,
       totalCompletions: completions.count || 0,
-      recentActivities: (activities.data || []) as any,
+      recentActivities: (recentRes.data || []) as any,
     })
   }
 
