@@ -33,36 +33,44 @@ export default function HomePage() {
   }, [profile])
 
   const loadData = async () => {
-    if (!profile) return
-    const [subjectsData, activitiesData, completionsData] = await Promise.all([
-      supabase.from('subjects').select('*').order('order_index'),
-      supabase.from('activities').select('*'),
-      supabase.from('completions').select('*').eq('user_id', profile.id),
-    ])
-    if (!subjectsData.data) return
+    try {
+      const [subjectsData, activitiesData] = await Promise.all([
+        supabase.from('subjects').select('*').order('order_index'),
+        supabase.from('activities').select('*'),
+      ])
+      if (!subjectsData.data) return
 
-    const acts = (activitiesData.data || []) as Activity[]
-    const comps = (completionsData.data || []) as Completion[]
-    const completedIds = new Set(comps.map(c => c.activity_id))
-    const isInfo = (a: Activity) => a.pinned || a.type === 'informacion'
+      let comps: Completion[] = []
+      if (profile) {
+        const completionsData = await supabase.from('completions').select('*').eq('user_id', profile.id)
+        comps = (completionsData.data || []) as Completion[]
+      }
 
-    const subjectsWithStats: SubjectWithStats[] = subjectsData.data.map((s: Subject) => {
-      const subjectActs = acts.filter(a => a.subject_id === s.id && !isInfo(a))
-      const totalCount = subjectActs.length
-      const completedCount = subjectActs.filter(a => completedIds.has(a.id)).length
-      const pendingCount = totalCount - completedCount
-      const now = new Date()
-      const upcomingDates = subjectActs
-        .filter(a => a.due_date && !completedIds.has(a.id) && new Date(a.due_date) > now)
-        .map(a => a.due_date!)
-        .sort()
-      const nextDate = upcomingDates[0] || null
+      const acts = (activitiesData.data || []) as Activity[]
+      const completedIds = new Set(comps.map(c => c.activity_id))
+      const isInfo = (a: Activity) => a.pinned || a.type === 'informacion'
 
-      return { ...s, pendingCount, completedCount, totalCount, nextDate }
-    })
+      const subjectsWithStats: SubjectWithStats[] = subjectsData.data.map((s: Subject) => {
+        const subjectActs = acts.filter(a => a.subject_id === s.id && !isInfo(a))
+        const totalCount = subjectActs.length
+        const completedCount = subjectActs.filter(a => completedIds.has(a.id)).length
+        const pendingCount = totalCount - completedCount
+        const now = new Date()
+        const upcomingDates = subjectActs
+          .filter(a => a.due_date && !completedIds.has(a.id) && new Date(a.due_date) > now)
+          .map(a => a.due_date!)
+          .sort()
+        const nextDate = upcomingDates[0] || null
 
-    setSubjects(subjectsWithStats)
-    setLoading(false)
+        return { ...s, pendingCount, completedCount, totalCount, nextDate }
+      })
+
+      setSubjects(subjectsWithStats)
+    } catch (e) {
+      console.error('Error cargando las materias:', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getGreeting = () => {
