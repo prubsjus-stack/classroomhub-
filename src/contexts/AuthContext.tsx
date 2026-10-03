@@ -22,8 +22,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-      if (data) setProfile(data as Profile)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (data) {
+        setProfile(data as Profile)
+        return
+      }
+      if (!error) return
+
+      // Supabase puede rechazar un JWT valido (por ejemplo PGRST303, desfase de
+      // reloj interno). Reintentamos sin la cabecera Authorization, solo apikey.
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?select=*&id=eq.${userId}`,
+        { headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY } }
+      )
+      if (!res.ok) return
+      const rows = (await res.json()) as Profile[]
+      if (Array.isArray(rows) && rows[0]) setProfile(rows[0])
     } catch (e) {
       console.error('Error fetching profile:', e)
     }
